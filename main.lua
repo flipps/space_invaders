@@ -1,17 +1,21 @@
 enemy = {}
 enemies_controller = {}
 enemies_controller.enemies = {}
-enemy_space_between = 20
+love.graphics.setDefaultFilter('nearest', 'nearest') -- Filter to scale image with no distortion.
+enemies_controller.image = love.graphics.newImage('enemy.png')
+enemy_space_between = 80
 
 function love.load()
-    player = {}
-    player.width = 80
-    player.height = 20
-    player.bullets = {}
-    player.speed = 5
-    player.fireCooldown = 20
-    player.x = 0
-    player.y = 550
+    player = {
+        width = 80,
+        height = 20,
+        bullets = {},
+        speed = 5,
+        fireCooldown = 20,
+        x = 0,
+        y = 550
+    }
+
     player.fire = function()
         if player.fireCooldown <= 0 then
             player.fireCooldown = 20
@@ -23,18 +27,17 @@ function love.load()
             table.insert(player.bullets, bullet)
         end
     end
-    
+
     for i=3, 1, -1 do
         enemies_controller:spawnEnemy(love.math.random(20, 780), 0)
     end
-
 end
 
 function enemies_controller:spawnEnemy(x, y)
     enemy = {}
     enemy.x = x + enemy_space_between
     enemy.y = y
-    enemy.size = 20
+    enemy.size = 16 * 5 -- increasing enemy image size by 5 in Draw function
     enemy.speed = 2
     enemy.cooldown = 20
     table.insert(self.enemies, enemy)
@@ -118,8 +121,8 @@ function love.draw()
     
     -- Draw enemies
     for _,e in pairs(enemies_controller.enemies) do
-        love.graphics.setColor(255, 0, 0)
-        love.graphics.rectangle('fill', e.x, e.y, e.size, e.size)
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.draw(enemies_controller.image, e.x, e.y, 0, 5) -- first value before x and y is rotation, then the size.
     end
 
     -- Draw bullets
