@@ -6,10 +6,14 @@ enemy_space_between = 80
 -- assets
 love.graphics.setDefaultFilter('nearest', 'nearest') -- Filter to scale image with no distortion.
 enemies_controller.image = love.graphics.newImage('enemy.png')
+ambienceSound = love.audio.newSource('ambience.mp3', 'stream')
 laserShotSound = love.audio.newSource('laser_shot.wav', 'static')
 enemyDestroyedSound = love.audio.newSource('enemy_down.mp3', 'static')
 
 function love.load()
+
+    ambienceSound:play()
+    
     player = {
         width = 80,
         height = 20,
