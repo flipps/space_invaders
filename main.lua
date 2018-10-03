@@ -1,9 +1,13 @@
 enemy = {}
 enemies_controller = {}
 enemies_controller.enemies = {}
+enemy_space_between = 80
+
+-- assets
 love.graphics.setDefaultFilter('nearest', 'nearest') -- Filter to scale image with no distortion.
 enemies_controller.image = love.graphics.newImage('enemy.png')
-enemy_space_between = 80
+laserShotSound = love.audio.newSource('laser_shot.wav', 'static')
+enemyDestroyedSound = love.audio.newSource('enemy_down.mp3', 'static')
 
 function love.load()
     player = {
@@ -13,11 +17,12 @@ function love.load()
         speed = 5,
         fireCooldown = 20,
         x = 0,
-        y = 550
+        y = 550,
     }
 
     player.fire = function()
         if player.fireCooldown <= 0 then
+            playSound(laserShotSound)
             player.fireCooldown = 20
             bullet = {}
             bullet.size = 5
@@ -30,6 +35,15 @@ function love.load()
 
     for i=3, 1, -1 do
         enemies_controller:spawnEnemy(love.math.random(20, 780), 0)
+    end
+end
+
+function playSound(sound)
+    if sound:isPlaying() then
+        sound:stop()
+        sound:play()
+    else
+        sound:play()
     end
 end
 
@@ -99,7 +113,7 @@ function love.update(dt)
         if e.y >= 620 then
             table.remove(enemies_controller.enemies, i)
         end
-
+        
         e.y = e.y + e.speed
     end
 
@@ -109,6 +123,7 @@ function love.update(dt)
             if checkBulletEnemyCollision(b.x, b.y, e.x, e.y, b.size, e.size) then
                 table.remove(player.bullets, i)
                 table.remove(enemies_controller.enemies, j)
+                playSound(enemyDestroyedSound)
             end
         end
     end
