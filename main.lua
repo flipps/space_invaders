@@ -58,6 +58,7 @@ function enemies_controller:spawnEnemy(x, y)
     enemy.size = 16 * 5 -- increasing enemy image size by 5 in Draw function
     enemy.speed = 2
     enemy.cooldown = 20
+    enemy.resistance = 2
     table.insert(self.enemies, enemy)
 end
 
@@ -125,9 +126,15 @@ function love.update(dt)
     for i,b in ipairs(player.bullets) do
         for j,e in ipairs(enemies_controller.enemies) do
             if checkBulletEnemyCollision(b.x, b.y, e.x, e.y, b.size, e.size) then
+                e.resistance = e.resistance - 1
+                
+                if e.resistance <= 0 then
+                    e.resistance = 2
+                    table.remove(enemies_controller.enemies, j)
+                    playSound(enemyDestroyedSound)
+                end
+
                 table.remove(player.bullets, i)
-                table.remove(enemies_controller.enemies, j)
-                playSound(enemyDestroyedSound)
             end
         end
     end
