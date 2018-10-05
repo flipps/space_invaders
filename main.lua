@@ -3,11 +3,13 @@ enemies_controller = {}
 enemies_controller.enemies = {}
 enemy_space_between = 80
 distance = 0
-spawn_waves_time = 100
+spawn_waves_time = 200
+game_started = false
 
 -- assets
 love.graphics.setDefaultFilter('nearest', 'nearest') -- Filter to scale image with no distortion.
 enemies_controller.image = love.graphics.newImage('enemy.png')
+game_title = love.graphics.newArrayImage('invadets_title.png')
 ambienceSound = love.audio.newSource('ambience.mp3', 'stream')
 laserShotSound = love.audio.newSource('laser_shot.wav', 'static')
 enemyDestroyedSound = love.audio.newSource('enemy_down.mp3', 'static')
@@ -78,8 +80,8 @@ function spawnEnemyWaves()
     spawn_waves_time = spawn_waves_time - 1
 
     if spawn_waves_time <= 0 and game_over == false then
-        spawn_waves_time = 100
-        for i=0, 5 do
+        spawn_waves_time = 200
+        for i=0, 6 do
             enemies_controller:spawnEnemy(i * 100, 0)
         end
     end
@@ -123,6 +125,9 @@ function love.update(dt)
     movePlayer()
     spawnEnemyWaves()
 
+    if love.keyboard.isDown('g') then
+        game_started = true
+    end
     -- Fire!
     if love.keyboard.isDown('space') then
         player.fire()
@@ -176,26 +181,31 @@ end
 function love.draw()
     displayPlayerPoints(player.points)
 
-    -- If an enemy reaches the bottom of the screen, game over!
-    if game_over then
-        love.graphics.print('Game Over!')
-        love.audio.stop(ambienceSound, laserShotSound, enemyDestroyedSound)
-        return
-    end
+    love.graphics.draw(game_title, game_title:getWidth() / 4, love.graphics.getHeight() / 3)
+    love.audio.stop(laserShotSound, enemyDestroyedSound)
 
-    -- Draw player
-    -- love.graphics.setColor(255, 255, 0)
-    love.graphics.draw(player.image, player.x, player.y)
-    
-    -- Draw enemies
-    for _,e in pairs(enemies_controller.enemies) do
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.draw(enemies_controller.image, e.x, e.y, 0, 3) -- first value before x and y is rotation, then the size.
-    end
+    if game_started then
+        -- If an enemy reaches the bottom of the screen, game over!
+        if game_over then
+            love.graphics.print('Game Over!')
+            love.audio.stop(ambienceSound, laserShotSound, enemyDestroyedSound)
+            return
+        end
 
-    -- Draw bullets
-    for _,b in pairs(player.bullets) do
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.rectangle('fill', b.x, b.y, b.size, b.size)
+        -- Draw player
+        -- love.graphics.setColor(255, 255, 0)
+        love.graphics.draw(player.image, player.x, player.y)
+        
+        -- Draw enemies
+        for _,e in pairs(enemies_controller.enemies) do
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.draw(enemies_controller.image, e.x, e.y, 0, 3) -- first value before x and y is rotation, then the size.
+        end
+
+        -- Draw bullets
+        for _,b in pairs(player.bullets) do
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.rectangle('fill', b.x, b.y, b.size, b.size)
+        end
     end
 end
