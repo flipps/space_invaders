@@ -15,11 +15,12 @@ ambienceSound = love.audio.newSource('ambience.mp3', 'stream')
 laserShotSound = love.audio.newSource('laser_shot.wav', 'static')
 enemyDestroyedSound = love.audio.newSource('enemy_down.mp3', 'static')
 
-playButtonX = love.graphics.getWidth() / 2 - play_button:getWidth() / 2
-
 function love.load()
     game_over = false
-    ambienceSound:play()
+
+    if game_over == false then
+        ambienceSound:play()
+    end
 
     player = {
         width = 80,
@@ -121,12 +122,14 @@ function boundBoxCollision(ax, ay, w1, h1, bx, by, w2, h2)
     by < ay + h1
 end
 
-function love.mousepressed(x, y, button) 
+function love.mousepressed(x, y, button)
+    local playButtonX = love.graphics.getWidth() / 2 - play_button:getWidth() / 2
     if button == 1 then
         if x >= playButtonX and 
         x <= playButtonX + play_button:getWidth() and 
         y >= love.graphics.getHeight() / 2 and 
         y <= love.graphics.getHeight() / 2 + play_button:getHeight() then
+            game_over = false
             game_started = true
         end
     end
@@ -159,6 +162,7 @@ function love.update(dt)
     for i,e in ipairs(enemies_controller.enemies) do
         if e.y >= love.graphics.getHeight() then
             game_over = true
+            game_started = false
             table.remove(enemies_controller.enemies, i)
         end
         
@@ -204,25 +208,32 @@ function love.draw()
 
     -- If an enemy reaches the bottom of the screen, game over!
     if game_over then
-        love.graphics.print('Game Over!', love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-        love.audio.stop(ambienceSound, laserShotSound, enemyDestroyedSound)
+        love.graphics.draw(game_title, love.graphics.getWidth() / 2 - game_title:getWidth() / 2, love.graphics.getHeight() / 3)
+        love.graphics.draw(play_button, love.graphics.getWidth() / 2 - play_button:getWidth() / 2, love.graphics.getHeight() / 2)
+        love.graphics.print('Game Over!')
+        enemies_controller.enemies = {}
+        player.points = 0
+        love.audio.pause(laserShotSound, enemyDestroyedSound)
         return
     end
 
     -- Draw player
-    if game_started then
-        love.graphics.draw(player.image, player.x, player.y)
+    if game_over == false then
+        if game_started then
+            love.graphics.draw(player.image, player.x, player.y)
+        end
+        
+        -- Draw enemies
+        for _,e in pairs(enemies_controller.enemies) do
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.draw(enemies_controller.image, e.x, e.y, 0, 3) -- first value before x and y is rotation, then the size.
+        end
+    
+        -- Draw bullets
+        for _,b in pairs(player.bullets) do
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.rectangle('fill', b.x, b.y, b.size, b.size)
+        end
     end
     
-    -- Draw enemies
-    for _,e in pairs(enemies_controller.enemies) do
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.draw(enemies_controller.image, e.x, e.y, 0, 3) -- first value before x and y is rotation, then the size.
-    end
-
-    -- Draw bullets
-    for _,b in pairs(player.bullets) do
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.rectangle('fill', b.x, b.y, b.size, b.size)
-    end
 end
