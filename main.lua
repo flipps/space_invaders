@@ -9,7 +9,8 @@ game_started = false
 -- assets
 love.graphics.setDefaultFilter('nearest', 'nearest') -- Filter to scale image with no distortion.
 enemies_controller.image = love.graphics.newImage('enemy.png')
-game_title = love.graphics.newArrayImage('invadets_title.png')
+game_title = love.graphics.newImage('invadets_title.png')
+play_button = love.graphics.newImage('play.png')
 ambienceSound = love.audio.newSource('ambience.mp3', 'stream')
 laserShotSound = love.audio.newSource('laser_shot.wav', 'static')
 enemyDestroyedSound = love.audio.newSource('enemy_down.mp3', 'static')
@@ -118,6 +119,19 @@ function boundBoxCollision(ax, ay, w1, h1, bx, by, w2, h2)
     by < ay + h1
 end
 
+playButtonX = love.graphics.getWidth() / 2 - play_button:getWidth() / 2
+
+function love.mousepressed(x, y, button) 
+    if button == 1 then
+        if x >= playButtonX and 
+        x <= playButtonX + play_button:getWidth() and 
+        y >= love.graphics.getHeight() / 2 and 
+        y <= love.graphics.getHeight() / 2 + play_button:getHeight() then
+            game_started = true
+        end
+    end
+end
+
 function love.update(dt)
 
     player.fireCooldown = player.fireCooldown - 1
@@ -125,9 +139,6 @@ function love.update(dt)
     movePlayer()
     spawnEnemyWaves()
 
-    if love.keyboard.isDown('g') then
-        game_started = true
-    end
     -- Fire!
     if love.keyboard.isDown('space') then
         player.fire()
@@ -181,8 +192,13 @@ end
 function love.draw()
     displayPlayerPoints(player.points)
 
-    love.graphics.draw(game_title, game_title:getWidth() / 4, love.graphics.getHeight() / 3)
-    love.audio.stop(laserShotSound, enemyDestroyedSound)
+    if game_started == false then
+        love.graphics.draw(game_title, love.graphics.getWidth() / 2 - game_title:getWidth() / 2, love.graphics.getHeight() / 3)
+        love.graphics.draw(play_button, love.graphics.getWidth() / 2 - play_button:getWidth() / 2, love.graphics.getHeight() / 2)
+        love.audio.pause(laserShotSound, enemyDestroyedSound)
+    else
+        love.graphics.draw(game_title, game_title:getWidth() + 800)
+    end
 
     if game_started then
         -- If an enemy reaches the bottom of the screen, game over!
