@@ -14,7 +14,6 @@ function enemies_controller:spawnEnemy(x, y)
   enemy.resistance = 1
   enemy.value = 20
   table.insert(self.enemies, enemy)
-  print(enemy.x)
 end
 
 function enemy:fire() -- enemy:fire is short for enemy.fire(self) which is a reference to the table we created at the load function.
